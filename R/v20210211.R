@@ -100,14 +100,14 @@ colnames(V)<-PCS
 S<- replace(SVD$d,SVD$d<0,0)[1:minx]  # 奇異值小於0視為0為無效奇異值
 lambda<- S^2     # 特徵值
 ######SVD 分解方法二######
-eigu<- eigen(X%*%t(X))  # 特徵分解(公式5.6)
+eigu<- eigen(X%*%t(X))  
 lambda<- replace(eigu$values,eigu$values<0,0) 
 U<-eigu$vectors
 V<- t(t(t(X)%*%U%*%diag(sqrt(lambda)))/eigu$values)
 S<-sqrt(lambda)[1:minx]
 U<-U[,1:minx]
 V<-V[,1:minx]
-round(X,9)==round(U%*%diag(S)%*%t(V),9)  # 驗證公式(5.4)
+round(X,9)==round(U%*%diag(S)%*%t(V),9)  
 ###########################################
 mult<-as.vector(sign(t(cw)%*%V)) #  變號因子
 V <- t(t(V)*mult)/sqrt(cw)
