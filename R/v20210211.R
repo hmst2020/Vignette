@@ -86,7 +86,6 @@ print(cor(std.qn[,ka]))     # 活躍變數的相關矩陣(correlation matrix)
 library(pracma)
 minx<-Rank(X)   # 有效維度
 PCS<- c('主成分1','主成分2','主成分3','主成分4')[1:minx]
-#minx<-min(nrow(X),ncol(X))    # SVD 的行列
 if (nrow(X)<=ncol(X)){
   SVD<- svd(t(X),nv=minx,nu=minx)  # 奇異值分解
 }else{
@@ -98,11 +97,21 @@ colnames(U)<-PCS
 V<- ifelse(nrow(X)<=ncol(X),list(SVD$u),list(SVD$v))[[1]]       # 右左奇異矩陣
 rownames(V)<-colnames(X)
 colnames(V)<-PCS
+S<- replace(SVD$d,SVD$d<0,0)[1:minx]  # 奇異值小於0視為0為無效奇異值
+lambda<- S^2     # 特徵值
+######SVD 分解方法二######
+eigu<- eigen(X%*%t(X))  # 特徵分解(公式5.6)
+lambda<- replace(eigu$values,eigu$values<0,0) 
+U<-eigu$vectors
+V<- t(t(t(X)%*%U%*%diag(sqrt(lambda)))/eigu$values)
+S<-sqrt(lambda)[1:minx]
+U<-U[,1:minx]
+V<-V[,1:minx]
+round(X,9)==round(U%*%diag(S)%*%t(V),9)  # 驗證公式(5.4)
+###########################################
 mult<-as.vector(sign(t(cw)%*%V)) #  變號因子
 V <- t(t(V)*mult)/sqrt(cw)
 U <- t(t(U)*mult)/sqrt(rw)
-S<- replace(SVD$d,SVD$d<0,0)[1:minx]  # 奇異值小於0視為0為無效奇異值
-lambda<- S^2     # 特徵值
 P<- t(t(U)*S)    # 個體座標
 Q<- t(t(V)*S)    # 變數座標# 特徵值
 inertia<-data.frame(    # 分解後各成分比率
